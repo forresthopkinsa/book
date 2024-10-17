@@ -331,22 +331,25 @@ most common and follows the C programming language’s ABI.
 
 > #### Calling Rust Functions from Other Languages
 >
-> We can also use `extern` to create an interface that allows other languages
-> to call Rust functions. Instead of creating a whole `extern` block, we add
-> the `extern` keyword and specify the ABI to use just before the `fn` keyword
-> for the relevant function. We also need to add a `#[no_mangle]` annotation to
-> tell the Rust compiler not to mangle the name of this function. *Mangling* is
-> when a compiler changes the name we’ve given a function to a different name
+> We can also use `extern` to create an interface that allows other languages to
+> call Rust functions. Instead of creating a whole `extern` block, we add the
+> `extern` keyword and specify the ABI to use just before the `fn` keyword for
+> the relevant function. We also need to add a `#[unsafe(no_mangle)]` annotation
+> to tell the Rust compiler not to mangle the name of this function. *Mangling*
+> is when a compiler changes the name we’ve given a function to a different name
 > that contains more information for other parts of the compilation process to
 > consume but is less human readable. Every programming language compiler
 > mangles names slightly differently, so for a Rust function to be nameable by
-> other languages, we must disable the Rust compiler’s name mangling.
+> other languages, we must disable the Rust compiler’s name mangling. This is
+> unsafe because there might be name collisions across libraries without the
+> built-in mangling, so it is our responsibility to make sure the name we have
+> exported is safe to export without mangling.
 >
 > In the following example, we make the `call_from_c` function accessible from
 > C code, after it’s compiled to a shared library and linked from C:
 >
 > ```rust
-> #[no_mangle]
+> #[unsafe(no_mangle)]
 > pub extern "C" fn call_from_c() {
 >     println!("Just called a Rust function from C!");
 > }
