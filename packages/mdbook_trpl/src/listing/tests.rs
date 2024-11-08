@@ -287,9 +287,3 @@ fn main() {}
         )
     }
 }
-
-#[test]
-fn missing_value() {}
-
-#[cfg(test)]
-mod config;

@@ -9,6 +9,8 @@ use mdbook::{
 use pulldown_cmark::{html, Event};
 use pulldown_cmark_to_cmark::cmark;
 
+use crate::config::Mode;
+
 /// A preprocessor for rendering listings more elegantly.
 ///
 /// Given input like this:
@@ -59,26 +61,7 @@ impl Preprocessor for TrplListing {
     }
 
     fn run(&self, ctx: &PreprocessorContext, mut book: Book) -> Result<Book> {
-        let config = ctx
-            .config
-            .get_preprocessor(self.name())
-            .ok_or(Error::NoConfig)?;
-
-        let key = String::from("output-mode");
-        let mode = config
-            .get(&key)
-            .map(|value| match value.as_str() {
-                Some(s) => Mode::try_from(s).map_err(|_| Error::BadValue {
-                    key,
-                    value: value.to_string(),
-                }),
-                None => Err(Error::BadValue {
-                    key,
-                    value: value.to_string(),
-                }),
-            })
-            .transpose()?
-            .unwrap_or(Mode::Default);
+        let mode = Mode::from_context(ctx, self.name())?;
 
         let mut errors: Vec<String> = vec![];
         book.for_each_mut(|item| {
@@ -103,40 +86,8 @@ impl Preprocessor for TrplListing {
 }
 
 #[derive(Debug, thiserror::Error)]
-enum Error {
-    #[error("No config for trpl-listing")]
-    NoConfig,
-
-    #[error("Bad config value '{value}' for key '{key}'")]
-    BadValue { key: String, value: String },
-}
-
-#[derive(Debug, thiserror::Error)]
 #[error("Error(s) rewriting input: {0}")]
 struct CompositeError(String);
-
-#[derive(Debug, Clone, Copy)]
-enum Mode {
-    Default,
-    Simple,
-}
-
-/// Trivial marker struct to indicate an internal error.
-///
-/// The caller has enough info to do what it needs without passing data around.
-struct ParseErr;
-
-impl TryFrom<&str> for Mode {
-    type Error = ParseErr;
-
-    fn try_from(value: &str) -> std::prelude::v1::Result<Self, Self::Error> {
-        match value {
-            "default" => Ok(Mode::Default),
-            "simple" => Ok(Mode::Simple),
-            _ => Err(ParseErr),
-        }
-    }
-}
 
 fn rewrite_listing(src: &str, mode: Mode) -> Result<String, String> {
     let final_state = new_cmark_parser(src, true).try_fold(
