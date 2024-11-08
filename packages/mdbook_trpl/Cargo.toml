@@ -11,6 +11,10 @@ path = "src/bin/note/main.rs"
 name = "mdbook-trpl-listing"
 path = "src/bin/listing/main.rs"
 
+[[bin]]
+name = "mdbook-trpl-figure"
+path = "src/bin/figure/main.rs"
+
 [dependencies]
 clap = { version = "4", features = ["derive"] }
 html_parser = "0.7.0"

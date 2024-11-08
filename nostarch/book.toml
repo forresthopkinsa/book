@@ -14,5 +14,8 @@ build-dir = "../tmp"
 [preprocessor.trpl-listing]
 output-mode = "simple"
 
+[preprocessor.trpl-figure]
+output-mode = "simple"
+
 [rust]
 edition = "2021"
