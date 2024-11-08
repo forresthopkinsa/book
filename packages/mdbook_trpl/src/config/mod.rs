@@ -1,4 +1,4 @@
-//! Get any `preprocessor.trpl` config.
+//! Get any `preprocessor.trpl-*` config.
 
 use mdbook::preprocess::PreprocessorContext;
 
@@ -45,7 +45,7 @@ pub struct ParseErr;
 impl TryFrom<&str> for Mode {
     type Error = ParseErr;
 
-    fn try_from(value: &str) -> std::prelude::v1::Result<Self, Self::Error> {
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value {
             "default" => Ok(Mode::Default),
             "simple" => Ok(Mode::Simple),
@@ -57,7 +57,7 @@ impl TryFrom<&str> for Mode {
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error(transparent)]
-    Mdbook(mdbook::errors::Error),
+    Mdbook(#[from] mdbook::errors::Error),
 
     #[error("No config for '{0}'")]
     NoConfig(String),
